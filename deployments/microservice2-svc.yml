@@ -1,0 +1,51 @@
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    run: microservinsumo2-svc
+  name: microservinsumo2-svc
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      run: microservinsumo2-svc
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        run: microservinsumo2-svc
+    spec:
+      containers:
+      - name: microservinsumo2-svc
+        image: docker.io/morjuela/microservinsumo2
+        imagePullPolicy: IfNotPresent
+        env:
+          - name: API_QUEUE
+            value: "192.168.50.4"
+        ports:
+        - containerPort: 3022
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    run: microservinsumo2-svc
+  name: microservinsumo2-svc
+  namespace: default
+spec:
+  ports:
+  - port: 80
+    protocol: TCP
+    targetPort: 3022
+  selector:
+    run: microservinsumo2-svc
+  sessionAffinity: None
+  type: LoadBalancer
