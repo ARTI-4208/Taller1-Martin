@@ -1,0 +1,12 @@
+{
+	"name": "microservice",
+	"version": "1.0.0",
+	"dependencies": {
+		"express": "*",
+		"method-override": "*",
+		"body-parser": "*",
+		"requestify": "*",
+		"nedb": "*",
+		"amqplib":"*"
+	}
+}
