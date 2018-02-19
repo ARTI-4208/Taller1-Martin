@@ -1,0 +1,51 @@
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    run: microsvinsumos-svc
+  name: microsvinsumos-svc
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      run: microsvinsumos-svc
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        run: microsvinsumos-svc
+    spec:
+      containers:
+      - name: microsvinsumos-svc
+        image: docker.io/morjuela/microsvinsumos
+        imagePullPolicy: IfNotPresent
+        env:
+          - name: API_QUEUE
+            value: "172.24.101.93"
+        ports:
+        - containerPort: 3022
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    run: microsvinsumos-svc
+  name: microsvinsumos-svc
+  namespace: default
+spec:
+  ports:
+  - port: 80
+    protocol: TCP
+    targetPort: 3022
+  selector:
+    run: microsvinsumos-svc
+  sessionAffinity: None
+  type: LoadBalancer
