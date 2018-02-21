@@ -55,18 +55,17 @@ app.get("/borrar", borrar);
 
 function consultar(peticion, resultado)
 {
-// Consulta a DB
-	con.connect();
-	con.query("SELECT * FROM insumos.insumo", function (err, result, fields)
+	// Consulta a DB
+	con.connect(function(err)
 	{
-		if (err) throw err;
-		console.log('La soluciOn es: ',result[0].solution);
-	}
-	con.end();
-	
-	console.log('La solucion es: ',result[0].solution);
-	
-	resultado.send("<strong>"+result[0]+"</strong>");
+		//if (err) throw err;
+		con.query("SELECT * FROM insumos.insumo", function (err, result, fields)
+		{
+			//if (err) throw err;
+			console.log(result);
+			resultado.send("<strong>"+console.log(result[0])+"</strong>");
+		});
+	});
 }
 
 function insertar(peticion, resultado)
