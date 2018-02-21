@@ -27,9 +27,9 @@ spec:
         imagePullPolicy: IfNotPresent
         env:
           - name: API_QUEUE
-            value: "172.24.101.93"
+            value: "172.31.3.25"
         ports:
-        - containerPort: 3022
+        - containerPort: 3020
       dnsPolicy: ClusterFirst
       restartPolicy: Always
 ---
@@ -44,7 +44,7 @@ spec:
   ports:
   - port: 80
     protocol: TCP
-    targetPort: 3022
+    targetPort: 3020
   selector:
     run: microsvinsumos-svc
   sessionAffinity: None
