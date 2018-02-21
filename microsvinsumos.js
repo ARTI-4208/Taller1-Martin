@@ -1,120 +1,160 @@
-var express        = require("express"),
-    app            = express();
-    bodyParser     = require("body-parser"),
-    methodOverride = require("method-override"),
-	amqp           = require('amqplib/callback_api');
-
-var allowCrossDomain = function(req, res, next) {
-    res.header('Access-Control-Allow-Origin', '*');
-    res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
-    res.header('Access-Control-Allow-Headers', 'Content-Type');
-    next();
-};
-
-// Middlewares
-app.use(bodyParser.urlencoded({ extended: false }));
-app.use(bodyParser.json());
-app.use(methodOverride());
-app.use(allowCrossDomain);
-
-// API routers
-var datos = express.Router();
-
-//Service to send message
-datos.get('/microservicio1/:message', function(req, res) {	
-	amqp.connect('amqp://test:test@' + process.env.API_QUEUE + ':5672', function(err, conn) {
-        conn.createChannel(function(err, ch) {
-            var q = 'test';
-            ch.assertQueue(q, {durable: false});
-            ch.sendToQueue(q, new Buffer(JSON.stringify(req.params.message)));
-            console.log(" [x] Sent " + req.params.message);
-            res.send({
-				version: 1,
-				mensaje: "Microservice sent: " + req.params.message,
-				success: true
-			});
-        });
-    });    
-});
-
-app.use('/', datos);
-////////////////////
-
+var express = require('express');
+var bodyParser = require('body-parser'); 
 var mysql = require('mysql');
-var con = mysql.createConnection({
-  host: "localhost",
-  user: "root",
-  password: "123",
-  database: "insumos"
+var oApp = express(); 
+oApp.use(bodyParser.json());
+oApp.use(bodyParser.urlencoded({ extended: true })); 
+var oMyConnection = mysql.createConnection({
+   host: 'localhost',
+   user: 'root',
+   password: '123',
+     database: 'insumos'   
 });
-
-app.get("/consultar", consultar);
-app.get("/insertar", insertar);
-app.get("/actualizar", actualizar);
-app.get("/borrar", borrar);
-
-function consultar(peticion, resultado)
-{
-	// Consulta a DB
-	con.connect(function(err)
-	{
-		//if (err) throw err;
-		con.query("SELECT * FROM insumos.insumo", function (err, result, fields)
-		{
-			//if (err) throw err;
-			console.log(result);
-			resultado.send("<strong>"+console.log(result[0])+"</strong>");
-		});
-	});
-}
-
-function insertar(peticion, resultado)
-{
-// Insert en base de datos
-                        con.connect(function(err) {
-                          if (err) throw err;
-                          console.log("Connected!");
-                          var sql = "INSERT INTO insumos.insumo (tipo, proveedor, cantidad, costo_unidad, fecha_in_inventario) values ('bombilloLEDSmall', 'proveedorBombillos', 100, 200000, NOW())";
-                          con.query(sql, function (err, result) {
-                                if (err) throw err;
-                                console.log("1 record inserted");
-  resultado.send("Last insert ID" + result.insertId);
-                          });
-                        });
-con.end();
-}
-
-function actualizar(peticion, resultado)
-{
-// Update en DB
-                        con.connect(function(err) {
-                          if (err) throw err;
-                          var sql = "UPDATE insumos.insumo SET cantidad = '999' WHERE tipo = 'bombilloLEDXL'";
-                          con.query(sql, function (err, result) {
-                                if (err) throw err;
-                                console.log(result.affectedRows + " record(s) updated");
-  resultado.send(result.affectedRows + " record(s) updated");
-                          });
-                        });
-con.end();
-}
-
-function borrar(peticion, resultado)
-{
-//EliminaciOn en la DB
-                        con.connect(function(err) {
-                          if (err) throw err;
-                          var sql = "DELETE FROM insumos.insumo WHERE tipo = 'bombilloLEDSmall'";
-                          con.query(sql, function (err, result) {
-                                if (err) throw err;
-                                console.log("Number of records deleted: " + result.affectedRows);
-  resultado.send("Number of records deleted: " + result.affectedRows);
-                          });
-                        });
-con.end();
-}
-
-// Start Server
-app.listen(3020, function(){
-	console.log("Server running on http://localhost:3020");
+oApp.get('/insumos', function(oReq, oRes) {
+   var sSQLGetAll = "SELECT * FROM insumos.insumo";
+   oMyConnection.query(sSQLGetAll, function(oError, oRows, oCols) {
+     if(oError) {
+       oRes.write(JSON.stringify({
+         error: true,
+         error_object: oError         
+       }));
+       oRes.end();
+     } else {
+       oRes.write(JSON.stringify(oRows));
+       oRes.end();       
+     }
+   });
 });
+ 
+function CreateInsumo(oDataInsumo, oResponse) {  
+  var sSQLCreate = "INSERT INTO insumos.insumo (insumo_id, tipo, proveedor, cantidad, costo_unidad, fecha_in_inventario) VALUES (NULL, ";
+  sSQLCreate += "'" + oDataInsumo.tipo + "', ";
+  sSQLCreate += "'" + oDataInsumo.proveedor + "', ";
+  sSQLCreate += "'" + oDataInsumo.cantidad + "', ";
+  sSQLCreate += "'" + oDataInsumo.costo_unidad + "', ";
+  sSQLCreate += "NOW())";
+    
+  oMyConnection.query(sSQLCreate, function(oError, oRows, oCols) {
+    if(oError) {
+      oResponse.write(JSON.stringify({
+        error: true,
+        error_object: oError
+      }));
+      oResponse.end();      
+    } else {
+      var iIDCreated = oRows.insertId;
+      oResponse.write(JSON.stringify({
+        error: false,
+        idCreated: iIDCreated
+      }));
+      oResponse.end();      
+    }    
+  });
+} 
+ 
+function ReadInsumo(oResponse) {
+  var sSQLRead = "SELECT * FROM insumos.insumo";
+  oMyConnection.query(sSQLRead, function(oError, oRows, oCols) {
+    if(oError) {
+      oResponse.write(JSON.stringify({
+        error: true,
+        error_object: oError
+      }));
+      oResponse.end();
+    } else {
+      oResponse.write(JSON.stringify({
+        error: false,
+        data: oRows
+      }));
+      oResponse.end();            
+    }    
+  });    
+}
+function UpdateInsumo(oDataInsumo, oResponse) {
+  var sSQLUpdate = "UPDATE insumos.insumo SET last_updated = NOW() ";
+  if(oDataInsumo.hasOwnProperty('tipo')) {
+    sSQLUpdate += " AND tipo = '" + oDataInsumo.tipo + "' ";
+  }
+  if(oDataInsumo.hasOwnProperty('proveedor')) {
+    sSQLUpdate += " AND proveedor = '" + oDataInsumo.proveedor + "' ";
+  }
+  if(oDataInsumo.hasOwnProperty('cantidad')) {
+    sSQLUpdate += " AND cantidad = '" + oDataInsumo.cantidad + "' ";
+  }
+  if(oDataInsumo.hasOwnProperty('costo_unidad')) {
+    sSQLUpdate += " AND costo_unidad = '" + oDataInsumo.costo_unidad + "' ";
+  }
+  sSQLUpdate = " WHERE insumo_id = '" + oDataInsumo.insumo_id + "'";
+  
+  oMyConnection.query(sSQLUpdate, function(oErrUpdate, oRowsUpdate, oColsUpdate) {
+    if(oErrUpdate) {
+      oResponse.write(JSON.stringify({ 
+        error: true,
+        error_object: oErrUpdate
+      }));
+      oResponse.end();      
+    } else {
+      oResponse.write(JSON.stringify({
+        error: false
+      }));
+      oResponse.end();
+    }
+  });
+}
+function DeleteInsumo(oDataInsumo, oResponse) {
+  var sSQLDelete = "DELETE FROM insumos.insumo WHERE insumo_id = '" + oDataInsumo.insumo_id + "'";
+  oMyConnection.query(sSQLDelete, function(oErrDelete, oRowsDelete, oColsDelete) {
+    if(oErrDelete) {
+      oResponse.write(JSON.stringify({
+        error: true,
+        error_object: oErrDelete
+      }));
+      oResponse.end();
+    } else {
+      oResponse.write(JSON.stringify({
+        error: false
+      }));
+      oResponse.end();      
+    }    
+  });  
+}
+ 
+ oApp.post('/insumos', function(oReq, oRes) {
+   var oDataOP = {};
+   var sOP = '';
+   
+   oDataOP = oReq.body.data_op;
+   sOP = oReq.body.op;
+   
+   switch(sOP) {
+     
+     case 'CREATE':      
+      CreateInsumo(oDataOP, oRes);
+     break;
+     
+     case 'READ':
+      ReadInsumo(oRes);
+     break;
+     
+     case 'UPDATE':
+      UpdateInsumo(oDataOP, oRes);
+     break;
+     
+     case 'DELETE':
+      DeleteInsumo(oDataOP, oRes);
+     break;
+     
+     default:
+      oRes.write(JSON.stringify({ 
+        error: true, 
+        error_message: 'Debes proveer una operación a realizar' 
+      }));
+      oRes.end();
+     break;
+     
+   }   
+ });
+ 
+ oApp.listen(3020, function(oReq, oRes) {
+   console.log("Servicios web gestión entidad Insumos, en puerto 3020");   
+ });
