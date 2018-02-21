@@ -1,10 +1,44 @@
 var express        = require("express"),
     app            = express();
-//    bodyParser     = require("body-parser"),
-//    methodOverride = require("method-override"),
-//    Datastore      = require('mysql'),
-//    db             = new Datastore({filename: '/home/messages.db', autoload: true}),
-//    amqp           = require('amqplib/callback_api');
+    bodyParser     = require("body-parser"),
+    methodOverride = require("method-override"),
+	amqp           = require('amqplib/callback_api');
+
+var allowCrossDomain = function(req, res, next) {
+    res.header('Access-Control-Allow-Origin', '*');
+    res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
+    res.header('Access-Control-Allow-Headers', 'Content-Type');
+    next();
+};
+
+// Middlewares
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.json());
+app.use(methodOverride());
+app.use(allowCrossDomain);
+
+// API routers
+var datos = express.Router();
+
+//Service to send message
+datos.get('/microservicio1/:message', function(req, res) {	
+	amqp.connect('amqp://test:test@' + process.env.API_QUEUE + ':5672', function(err, conn) {
+        conn.createChannel(function(err, ch) {
+            var q = 'test';
+            ch.assertQueue(q, {durable: false});
+            ch.sendToQueue(q, new Buffer(JSON.stringify(req.params.message)));
+            console.log(" [x] Sent " + req.params.message);
+            res.send({
+				version: 1,
+				mensaje: "Microservice sent: " + req.params.message,
+				success: true
+			});
+        });
+    });    
+});
+
+app.use('/', datos);
+////////////////////
 
 var mysql = require('mysql');
 var con = mysql.createConnection({
@@ -75,5 +109,7 @@ function borrar(peticion, resultado)
                         });
 }
 
-app.listen(3022);
-
+// Start Server
+app.listen(3020, function(){
+	console.log("Server running on http://localhost:3020");
+});
