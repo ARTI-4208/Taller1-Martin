@@ -64,6 +64,7 @@ function consultar(peticion, resultado)
   resultado.send("<strong>"+console.log(result[0])+"</strong>");
                                 });
                         });
+con.end();
 }
 
 function insertar(peticion, resultado)
@@ -79,6 +80,7 @@ function insertar(peticion, resultado)
   resultado.send("Last insert ID" + result.insertId);
                           });
                         });
+con.end();
 }
 
 function actualizar(peticion, resultado)
@@ -93,6 +95,7 @@ function actualizar(peticion, resultado)
   resultado.send(result.affectedRows + " record(s) updated");
                           });
                         });
+con.end();
 }
 
 function borrar(peticion, resultado)
@@ -107,6 +110,7 @@ function borrar(peticion, resultado)
   resultado.send("Number of records deleted: " + result.affectedRows);
                           });
                         });
+con.end();
 }
 
 // Start Server
