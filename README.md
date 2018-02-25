@@ -3,10 +3,10 @@
 Bienvenido al desarrollo del taller de microservicios del curso de arquitecturas de nueva generación, efectuado por Martin Orjuela.
 
 ## Contexto
-Para el .
+Este taller está enfocado en resolver mediante una Arquitectura de microservicios un caso de negocio del MarketPlace para LumenConcept.
 
 ## Pasos
-Este taller está enfocado:
+A continuación, se indican los pasos y herramientas utilizadas en el desarrollo de uno de los microservicios:
 
 * E.
 * .
@@ -18,7 +18,7 @@ Este taller está enfocado:
 > docker-compose up
 
 ## Hands On
-El taller se encuentra publicado en la Wiki de este repositorio:
+El taller se encuentra publicado en la Wiki del siguiente repositorio:
 
 [https://github.com/ARTI-4208/Taller-1/wiki](https://github.com/ARTI-4208/Taller-1/wiki)
 
@@ -31,21 +31,6 @@ El taller se encuentra publicado en la Wiki de este repositorio:
 * https://docs.docker.com/samples/library/mysql/
 * https://github.com/docker-library
 * http://www.aalmunia.net/blog/implementando-un-crud-con-node-js-y-mysql/
+* https://cloud.google.com/kubernetes-engine/docs/tutorials/hello-app
+* https://kubernetes.io/docs/tasks/access-application-cluster/communicate-containers-same-pod-shared-volume/
 
-
-## Material adicional
-
-Con miras al proyecto del curso, el cual puede realizarse en un proveedor externo como Amazon, se recomienda revisar los siguientes enlaces:
-
-* Primeros pasos en ECS para ejecutar tus contenedores, 
-  https://docs.aws.amazon.com/AmazonECS/latest/developerguide/docker-basics.html
-
-* Primeros pasos en ECR (Registry) donde se pueden almacenar las imágenes que se van a usar 
-  https://docs.aws.amazon.com/AmazonECR/latest/userguide/docker-basics.html
-
-* Sección donde podrá encontrar información de cómo realizar balanceo de carga entre pods y escalamiento con cloudwatch. 
-  https://docs.aws.amazon.com/AmazonECS/latest/developerguide/ecs_services.html
-
-* API gateway con ECS
-  https://docs.aws.amazon.com/es_es/apigateway/latest/developerguide/welcome.html
-  https://aws.amazon.com/es/blogs/compute/using-amazon-api-gateway-with-microservices-deployed-on-amazon-ecs/

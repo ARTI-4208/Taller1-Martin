@@ -1,0 +1,48 @@
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    run: api-gateway-svc
+  name: api-gateway-svc
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      run: api-gateway-svc
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        run: api-gateway-svc
+    spec:
+      containers:
+      - image: docker.io/cesarforero/apigateway
+        imagePullPolicy: IfNotPresent
+        name: api-gateway-svc
+        ports:
+        - containerPort: 3002
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    run: api-gateway-svc
+  name: api-gateway-svc
+  namespace: default
+spec:
+  ports:
+  - port: 80
+    protocol: TCP
+    targetPort: 3002
+  selector:
+    run: api-gateway-svc
+  sessionAffinity: None
+  type: LoadBalancer
