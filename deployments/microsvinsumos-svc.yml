@@ -34,7 +34,7 @@ spec:
         image: docker.io/morjuela/insumos-db
         imagePullPolicy: IfNotPresent
         ports:
-        - "3306"
+        - containerPort: 3306
       dnsPolicy: ClusterFirst
       restartPolicy: Always
 ---
