@@ -9,7 +9,7 @@ Este taller está enfocado en resolver mediante una Arquitectura de microservici
 A continuación, se indican los pasos y herramientas utilizadas en el desarrollo de uno de los microservicios:
 
 * Configuración de 2 instancias EC2 en AWS, una tipo t2.small para la configuración del servidor master y otra tipo t2.micro para la configuración del servidor Queue Manager.
-* Descargue el código de las aplicaciones que ejecutaremos por medio del comando:
+* Descargue el código de las aplicaciones que ejecutaremos por medio del comando (aunque principalmente todas las instalaciones se van a efectuar en Master, es necesario llevar una copia de la shell queue-install.sh al servidor Queue):
 ```sh
 git clone https://github.com/ARTI-4208/Taller1-Martin.git
 ```
@@ -19,12 +19,14 @@ git clone https://github.com/ARTI-4208/Taller1-Martin.git
 	* ./microservicio: Archivos para la creación de la imagen y contenedor del servicio en node.js [Dockerfile, microsvinsumos.js, package.json].
 	* ./deployments: Archivos para el depliegue en kubernetes del microservicio [microsvinsumos-svc.yml].
 	* ./deployments-apigateway: Archivos para el depliegue en kubernetes del API Gateway [api-gateway-svc.yml, package.json, registry.js].
-	* ./prerrequisitos: Archivos para la instalación de Docker, Kubernetes, RabbitMQ [master-install.sh, queue-install.sh].
+	* ./prerrequisitos: Archivos para la instalación de Docker, Kubernetes, RabbitMQ y Node js [master-install.sh, queue-install.sh].
 * Dentro de las instancias AWS se procede con la configuración inicial de prerrequisitos o instalación de software base, mediante las shells master-install.sh y queue-install.sh respectivamente. Estos procedimientos se encuentran en ./prerrequisitos.
+* Adicional a los prerrequisitos mencionados, es necesario proceder con la instalación de Docker-Compose (https://docs.docker.com/compose/install/) y Mysql (https://help.ubuntu.com/lts/serverguide/mysql.html).
 * Todos los pasos a realizar se deben ejecutar con altos privilegios, así que desde el comienzo proceda con la instrucción:
 ```sh
 sudo -s
 ```
+* Ubicarse en el nodo master.
 * Consultar imágenes de Docker:
 ```sh
 docker images
@@ -59,23 +61,56 @@ sysctl net.bridge.bridge-nf-call-iptables=1
 ```
 * Debido a que es posible que durante la instalación el nodo definido como Worker presente problemas de comunicación y no permita el despliegue de contenedores, Para poder continuar con el taller en caso que este nodo no logre establecer comunicación, digite el siguiente comando en el nodo master, el cual habilita la ejecución de pods en el mismo nodo maestro.
 ```sh
-#Comando opcional solo en caso que falle la conexión entre master y worker 
+#Comando opcional solo en caso que falle la conexión entre master y worker (ejecutado en el nodo master) 
 kubectl taint nodes --all node-role.kubernetes.io/master- 
 ```
 * Verifique la instalación de RabbitMQ accediendo a la plataforma de administración de RabbitMQ por medio de su navegador, ingresando la dirección:
 ```sh
-#Utilice la IP_RABBIT por la dirección IP de la máquina virtual.
+#Utilice la IP_RABBIT por la dirección IP de la máquina virtual (puede ser desde el servidor Queue).
 http://172.31.3.25:15672
 ```
-
-
-
+* Ubicándose en el directorio raiz descargado de GitHub  dentro del servidor master (Para que el archivo .yml sea reconocido por Docker-Compose) se ejecutan los siguientes comandos:
 ```sh
 docker-compose build
 docker-compose up
 ```
-
-
+* Se puede validar con el siguiente comando la ejecución de los contenedores (2 contenedores, uno para la base de datos y otro para la aplicación en Node.js):
+```sh
+docker ps
+```
+* Baje los servicios repitiendo los comandos Ctrl+"C" o ejecutando [docker stop id_contenedor] como es debido.
+* Guarde en una variable de ambiente su nombre de usuario del registro de imágenes de contenedoras de docker (hub.docker.com).
+```sh
+export DOCKER_ID_USER="username"
+```
+* Acceda a docker hub utilizando sus credenciales por medio del siguiente comando.
+```sh
+docker login
+```
+* Valide la creación de la imagen Docker con el siguiente comando:
+```sh
+docker images
+```
+    * De no existir la imagen, se debe crear la imagen con la aplicación del microservicio microsvinsumos.
+```sh
+docker build -t kubernetes-microsvinsumos:v1 .
+docker tag kubernetes-microsvinsumos:v15 $DOCKER_ID_USER/microsvinsumos
+```
+* Crear el "tag" y subir mediante "push" la imagen al Docker Hub:
+```sh
+docker tag mysqlnodejsmicroservice_insumos-microservicio $DOCKER_ID_USER/insumos-microservicio
+docker push $DOCKER_ID_USER/insumos-microservicio
+```
+* Realizar el mismo procedimiento para el servicio de base de datos:
+```sh
+docker tag mysqlnodejsmicroservice_insumos-db $DOCKER_ID_USER/insumos-db
+docker push $DOCKER_ID_USER/insumos-db
+```
+* En este punto se pueden volver a probar los servicios pero mediante un "pull" de las imágenes desde el Docker Hub.
+```sh
+docker pull morjuela/insumos-db
+docker pull morjuela/microservicio-db
+```
 
 * Por medio del siguiente comando podrá observar cuales son los pods que se están ejecutando y en que nodo.
 ```sh
