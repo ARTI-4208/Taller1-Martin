@@ -11,30 +11,37 @@ A continuación, se indican los pasos y herramientas utilizadas en el desarrollo
 * Configuración de 2 instancias EC2 en AWS, una tipo t2.small para la configuración del servidor master y otra tipo t2.micro para la configuración del servidor Queue Manager.
 * Dentro de las instancias AWS se procede con la configuración inicial de prerrequisitos o instalación de software base, mediante las shells master-install.sh y queue-install.sh respectivamente. Estos procedimientos se encuentran en ./prerrequisitos.
 * Todos los pasos a realizar se deben ejecutar con altos privilegios, así que desde el comienzo proceda con la instrucción:
-> sudo -s
+> sudo -s<
 * Consultar imágenes de Docker:
-> docker images
+> docker images<
 * Consultar contenedoras creadas:
-> docker ps -a 
-> docker ps
+> docker ps -a <
+> docker ps<
 * Cree el nodo maestro ejecutando el siguiente comando.
-> kubeadm init --apiserver-advertise-address=172.31.9.84 
+> kubeadm init --apiserver-advertise-address=172.31.9.84 <
 * Guarde el comando presentado como resultado de la anterior ejecución, dado que es el comando que debemos ejecutar en los otros nodos que deseemos unir a la red.
 * El siguiente paso es configurar la red de los pods del cluster. Para ello ejecute los siguientes comandos uno a uno:
-> mkdir -p $HOME/.kube
-> cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
-> chown $(id -u):$(id -g) $HOME/.kube/config
-> export KUBECONFIG=/etc/kubernetes/admin.conf
-> sysctl net.bridge.bridge-nf-call-iptables=1
-> export kubever=$(kubectl version | base64 | tr -d '\n')
-> kubectl apply -f "https://cloud.weave.works/k8s/net?k8s-version=$kubever"
+> mkdir -p $HOME/.kube<
+> cp -i /etc/kubernetes/admin.conf $HOME/.kube/config<
+> chown $(id -u):$(id -g) $HOME/.kube/config<
+> export KUBECONFIG=/etc/kubernetes/admin.conf<
+> sysctl net.bridge.bridge-nf-call-iptables=1<
+> export kubever=$(kubectl version | base64 | tr -d '\n')< 
+> kubectl apply -f "https://cloud.weave.works/k8s/net?k8s-version=$kubever"< 
 * Al digitar el siguiente comando debemos encontrar un listado de los nodos actualmente en la red, por el momento solo se presentará el nodo maestro.
-> kubectl get nodes
+> kubectl get nodes<
 * Habilite la regla de Firewall en la máquina.
-> sysctl net.bridge.bridge-nf-call-iptables=1
+> sysctl net.bridge.bridge-nf-call-iptables=1<
 * Debido a que es posible que durante la instalación el nodo definido como Worker presente problemas de comunicación y no permita el despliegue de contenedores, Para poder continuar con el taller en caso que este nodo no logre establecer comunicación, digite el siguiente comando en el nodo master, el cual habilita la ejecución de pods en el mismo nodo maestro.
-> #Comando opcional solo en caso que falle la conexión entre master y worker 
-> kubectl taint nodes --all node-role.kubernetes.io/master- 
+> #Comando opcional solo en caso que falle la conexión entre master y worker <
+> kubectl taint nodes --all node-role.kubernetes.io/master- <
+* Verifique la instalación de RabbitMQ accediendo a la plataforma de administración de RabbitMQ por medio de su navegador, ingresando la dirección:
+> #Cambie IP_RABBIT por la dirección IP de la máquina virtual.<
+> http://172.31.3.25:15672<
+* Descargue el código de las aplicaciones que ejecutaremos por medio del comando:
+> git clone https://github.com/ARTI-4208/Taller1-Martin.git<
+
+
 
 
 * Por medio del siguiente comando podrá observar cuales son los pods que se están ejecutando y en que nodo.
