@@ -1,0 +1,12 @@
+version: '3.3'
+services:
+  insumos-microservicio:
+    build: ./microservicio
+    ports:
+     - "3020:3020"
+    depends_on:
+     - insumos-db
+    environment:
+     - DATABASE_HOST=insumos-db
+  insumos-db:
+    build: ./database
