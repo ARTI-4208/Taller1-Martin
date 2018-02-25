@@ -5,8 +5,8 @@ Bienvenido al desarrollo del taller de microservicios del curso de arquitecturas
 ## Contexto
 Este taller está enfocado en resolver mediante una Arquitectura de microservicios un caso de negocio del MarketPlace para LumenConcept.
 
-## Pasos
-A continuación, se indican los pasos y herramientas utilizadas en el desarrollo de uno de los microservicios:
+## Pasos - Configuración Inicial
+A continuación, se indican los pasos y herramientas utilizadas inicialmente en el desarrollo de uno de los microservicios:
 
 * Configuración de 2 instancias EC2 en AWS, una tipo t2.small para la configuración del servidor master y otra tipo t2.micro para la configuración del servidor Queue Manager.
 * Descargue el código de las aplicaciones que ejecutaremos por medio del comando (aunque principalmente todas las instalaciones se van a efectuar en Master, es necesario llevar una copia de la shell queue-install.sh al servidor Queue):
@@ -55,6 +55,16 @@ kubectl apply -f "https://cloud.weave.works/k8s/net?k8s-version=$kubever"
 ```sh
 kubectl get nodes
 ```
+* Por medio del siguiente comando podrá observar cuales son los pods que se están ejecutando y en que nodo.
+```sh
+kubectl get pods --output=wide
+#Para mayor detalle de los pods
+kubectl describe pods
+```
+* También puede verificar que los 5 contenedores se están ejecutando, digitando en la consola del worker el comando:
+```sh
+docker ps -a
+```
 * Habilite la regla de Firewall en la máquina.
 ```sh
 sysctl net.bridge.bridge-nf-call-iptables=1
@@ -81,7 +91,7 @@ docker ps
 * Baje los servicios repitiendo los comandos Ctrl+"C" o ejecutando [docker stop id_contenedor] como es debido.
 * Guarde en una variable de ambiente su nombre de usuario del registro de imágenes de contenedoras de docker (hub.docker.com).
 ```sh
-export DOCKER_ID_USER="username"
+export DOCKER_ID_USER="morjuela"
 ```
 * Acceda a docker hub utilizando sus credenciales por medio del siguiente comando.
 ```sh
@@ -109,27 +119,43 @@ docker push $DOCKER_ID_USER/insumos-db
 * En este punto se pueden volver a probar los servicios pero mediante un "pull" de las imágenes desde el Docker Hub.
 ```sh
 docker pull morjuela/insumos-db
-docker pull morjuela/microservicio-db
+docker pull morjuela/insumos-microservicio
 ```
+* Se pueden probar únicamente los contenedores (teniendo en cuenta el procedimiento básico de la prueba):
+```sh
+docker run -d -P morjuela/insumos-db
+docker run -d -P morjuela/insumos-microservicio
+```
+## Pasos - Kubernetes
 
-* Por medio del siguiente comando podrá observar cuales son los pods que se están ejecutando y en que nodo.
-```sh
-kubectl get pods --output=wide
-#Para mayor detalle de los pods
-kubectl describe pods
-```
-* También puede verificar que los 5 contenedores se están ejecutando digitando en la consola del worker el comando:
-```sh
-docker ps -a
-```
-Verifique que los despliegues se está ejecutando por medio del comando:
+* Verifique que los despliegues se están ejecutando por medio del comando:
 ```sh
 kubectl get deployments
 ```
+* Ubíquese en la carpeta deployments (siguiendo en el nodo Master), en donde encontrará el archivo yml que describe los despliegues de contenedores del microservicio. Despliegue el microservicio "microsvinsumos-svc" por medio del siguiente comando:
+```sh
+kubectl apply -f microsvinsumos-svc.yml
+```
+* Debe aparecer un mensaje en consola donde se evidencia que el servicio y el despliegue han sido creados.
+```sh
+#...
+deployment "microsvinsumos-svc" created
+service "microsvinsumos-svc" created
+```
+* Puede verificar que están en ejecución por medio de los comandos:
+```sh
+#En el master
+kubectl get deployments
+kubectl get services
 
-
-
-
+#En el worker
+docker ps -a
+```
+Por medio del comando kubectl get services encontrará que el servicio balanceador de carga del microservicio tiene un puerto asignado. Utilice ese puerto para acceder a la aplicación por medio de la URL:
+```sh
+#Prueba del método GET para consultar toda la lista de insumos
+http://IP_WORKER:SERVICE_PORT/insumos
+```
 
 
 ## Hands On
