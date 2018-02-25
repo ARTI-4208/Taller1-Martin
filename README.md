@@ -101,7 +101,7 @@ docker login
 ```sh
 docker images
 ```
-    * De no existir la imagen, se debe crear la imagen con la aplicación del microservicio microsvinsumos.
+> De no existir la imagen, se debe crear la imagen con la aplicación del microservicio microsvinsumos.
 ```sh
 docker build -t kubernetes-microsvinsumos:v1 .
 docker tag kubernetes-microsvinsumos:v15 $DOCKER_ID_USER/microsvinsumos
@@ -151,7 +151,7 @@ kubectl get services
 #En el worker
 docker ps -a
 ```
-Por medio del comando kubectl get services encontrará que el servicio balanceador de carga del microservicio tiene un puerto asignado. Utilice ese puerto para acceder a la aplicación por medio de la URL:
+* Por medio del comando kubectl get services encontrará que el servicio balanceador de carga del microservicio tiene un puerto asignado. Utilice ese puerto para acceder a la aplicación por medio de la URL:
 ```sh
 #Prueba del método GET para consultar toda la lista de insumos
 http://IP_WORKER:SERVICE_PORT/insumos
