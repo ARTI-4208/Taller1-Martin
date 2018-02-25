@@ -14,6 +14,7 @@ Este taller está enfocado:
 * P.
 * 
 > docker-compose build
+
 > docker-compose up
 
 ## Hands On
