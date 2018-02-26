@@ -1,22 +1,8 @@
 var express = require('express');
 var bodyParser = require('body-parser');
 var mysql = require('mysql');
-var methodOverride = require("method-override"),
+var methodOverride = require("method-override");
 var amqp           = require('amqplib/callback_api');
-
-var allowCrossDomain = function(req, res, next) {
-    res.header('Access-Control-Allow-Origin', '*');
-    res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
-    res.header('Access-Control-Allow-Headers', 'Content-Type');
-    next();
-};
-// Middlewares
-app.use(bodyParser.urlencoded({ extended: false }));
-app.use(bodyParser.json());
-app.use(methodOverride());
-app.use(allowCrossDomain);
-// API routers
-var datos = express.Router();
 
 var oApp = express();
 oApp.use(bodyParser.json());
@@ -39,13 +25,12 @@ oApp.get('/microsvinsumos/insumos', function(oReq, oRes) {
        }));
        oRes.end();
      } else {
-       oRes.write(JSON.stringify(oRows));
-	   
+
 			amqp.connect('amqp://test:test@' + process.env.API_QUEUE + ':5672', function(err, conn) {
 				conn.createChannel(function(err, ch) {
 					var q = 'test';
 					ch.assertQueue(q, {durable: false});
-					ch.sendToQueue(q, new Buffer(JSON.stringify()));//req.params.message
+					ch.sendToQueue(q, new Buffer(JSON.stringify(oRows)));//req.params.message
 					console.log(" [x] Sent " + oRows);//req.params.message
 					oRes.send({
 						version: 1,
@@ -54,8 +39,9 @@ oApp.get('/microsvinsumos/insumos', function(oReq, oRes) {
 					});
 				});
 			});
-			
-       oRes.end();
+
+       oRes.write(JSON.stringify(oRows));
+	   oRes.end();
      }
    });
 });
