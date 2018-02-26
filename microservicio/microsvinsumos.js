@@ -11,7 +11,7 @@ var oMyConnection = mysql.createConnection({
    database: 'insumos',
    port: 3306
 });
-oApp.get('/insumos', function(oReq, oRes) {
+oApp.get('/microsvinsumos/insumos', function(oReq, oRes) {
    var sSQLGetAll = "SELECT * FROM insumos.insumo";
    oMyConnection.query(sSQLGetAll, function(oError, oRows, oCols) {
      if(oError) {
@@ -120,7 +120,7 @@ function DeleteInsumo(oDataInsumo, oResponse) {
   });
 }
 
- oApp.post('/insumos', function(oReq, oRes) {
+ oApp.post('/microsvinsumos', function(oReq, oRes) {
    var oDataOP = {};
    var sOP = '';
 
@@ -156,6 +156,6 @@ function DeleteInsumo(oDataInsumo, oResponse) {
    }
  });
 
- oApp.listen(3020, function(oReq, oRes) {
-   console.log("Servicios web gestión entidad Insumos, en puerto 3020");
+ oApp.listen(3069, function(oReq, oRes) {
+   console.log("Servicios web gestión entidad Insumos, en puerto 3069");
  });
