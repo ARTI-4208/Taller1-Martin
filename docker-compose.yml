@@ -3,7 +3,7 @@ services:
   insumos-microservicio:
     build: ./microservicio
     ports:
-     - "3020:3020"
+     - "3069:3069"
     depends_on:
      - insumos-db
     environment:

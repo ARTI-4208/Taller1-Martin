@@ -27,9 +27,9 @@ spec:
         imagePullPolicy: IfNotPresent
         env:
         - name: API_QUEUE
-          value: "172.31.3.25"
+          value: "172.24.101.93"
         ports:
-        - containerPort: 3020
+        - containerPort: 3069
       - name: dbinsumos-svc
         image: docker.io/morjuela/insumos-db
         imagePullPolicy: IfNotPresent
@@ -49,7 +49,7 @@ spec:
   ports:
   - port: 80
     protocol: TCP
-    targetPort: 3020
+    targetPort: 3069
   selector:
     run: microsvinsumos-svc
   sessionAffinity: None
