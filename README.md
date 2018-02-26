@@ -155,7 +155,7 @@ docker ps -a
 * Por medio del comando kubectl get services encontrará que el servicio balanceador de carga del microservicio tiene un puerto asignado. Utilice ese puerto para acceder a la aplicación por medio de la URL:
 ```sh
 #Prueba del método GET para consultar toda la lista de insumos
-curl http://IP_WORKER:SERVICE_PORT/insumos
+curl http://IP_WORKER:SERVICE_PORT/microsvinsumos/insumos
 ```
 
 ## Pasos - API Gateway
@@ -199,7 +199,7 @@ node registry.js
 * En su navegador escriba la dirección URL del API Gateway de la siguiente forma:
 ```sh
 #No olvide utilizar la IP de la máquina virtual donde corre el servicio de apigateway
-curl http://172.31.9.84:31602/app
+curl http://172.31.9.84:31602/apps
 ```
 * Ya puede realizar solicitudes al servicio por medio del apigateway siguiendo el API presentado anteriormente, ejemplo.
 ```sh
