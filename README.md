@@ -126,6 +126,7 @@ docker pull morjuela/insumos-microservicio
 docker run -d -P morjuela/insumos-db
 docker run -d -P morjuela/insumos-microservicio
 ```
+
 ## Pasos - Kubernetes
 
 * Verifique que los despliegues se están ejecutando por medio del comando:
@@ -154,9 +155,56 @@ docker ps -a
 * Por medio del comando kubectl get services encontrará que el servicio balanceador de carga del microservicio tiene un puerto asignado. Utilice ese puerto para acceder a la aplicación por medio de la URL:
 ```sh
 #Prueba del método GET para consultar toda la lista de insumos
-http://IP_WORKER:SERVICE_PORT/insumos
+curl http://IP_WORKER:SERVICE_PORT/insumos
 ```
 
+## Pasos - API Gateway
+Un componente como un APIGateway permite ofrecer una interfaz única para acceder a los microservicios, por lo que un cliente puede acceder a todas las aplicaciones como si se tratara de una sola.
+
+* Ubíquese nuevamente en el nodo master en la carpeta del código de deployments-apigateway que descargó anteriormente. En la carpeta deployment encontrará un archivo con el nombre api-gateway-svc.yml. Este archivo describe la configuración de despliegue de la aplicación de API Gateway la cual ya se encuentra empaquetada en una imagen publicada en:
+```sh
+docker.io/cesarforero/apigateway
+```
+* Cree el despliegue por medio del comando:
+```sh
+kubectl apply -f api-gateway-svc.yml
+```
+* Para validar que el servicio del api-gateway se está ejecutando, verifique el listado de servicios por medio del comando:
+```sh
+kubectl get services
+#Para visualizar todos los pods en ejecución
+kubectl get pods
+```
+* Tenga presente el puerto del servicio apigateway dado que será la interfaz por la que un cliente podrá comunicarse con las aplicaciones.
+* Para el registro de un nuevo servicio el cuerpo del mensaje debe ser el siguiente:
+```sh
+{
+    "appName": <name of the service>,
+    "hostName": <hostName of the service>,
+    "port": <port of the service (optional)>,
+    "service": <path of the service>,
+    "method": < Method for the request >
+}
+```
+* En la misma carpeta del código de deployments-apigateway encontrará un archivo con el nombre registry.js. Esta aplicación se encarga de ejecutar dos solicitudes POST por medio de requestify para registrar los microservicios que se están ejecutando. Usted debe:
+	* Cambiar la palabra API_GATEWAY al inicio del archivo por la dirección IP y el puerto donde se está ejecutando el servicio del apigateway.
+	* Cambiar la palabra ip_microservicio1 por la dirección ip del worker donde se está ejecutando el microservicio 1.
+	* Cambiar la palabra port_microservicio1 por el puerto por el que el servicio balanceador de carga de la aplicación microservicio1 está escuchando. Recuerde que puede conocerlo por medio del comando kubectl get services.
+	* Realizar los mismos cambios para el microservicio 2.
+* Ejecute la aplicación por medio de los comandos:
+```sh
+npm install
+node registry.js
+```
+* En su navegador escriba la dirección URL del API Gateway de la siguiente forma:
+```sh
+#No olvide utilizar la IP de la máquina virtual donde corre el servicio de apigateway
+curl http://172.31.9.84:31602/app
+```
+* Ya puede realizar solicitudes al servicio por medio del apigateway siguiendo el API presentado anteriormente, ejemplo.
+```sh
+curl http://172.31.9.84:31602/service/microsvinsumos/insumos
+```
 
 ## Hands On
 El taller se encuentra publicado en la Wiki del siguiente repositorio:
